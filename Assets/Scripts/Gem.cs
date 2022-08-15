@@ -13,6 +13,8 @@ public class Gem : MonoBehaviour {
     public int targetY;
     public bool isMatched = false;
 
+    
+
 
     private FindMatches findMatches;
     private Board board;
@@ -32,6 +34,15 @@ public class Gem : MonoBehaviour {
     public GameObject rowArrow;
     public GameObject columnArrow;
     public GameObject colorBomb;
+
+    [Header("Color Variables")]
+    public bool Yellow = false;
+    public bool Blue = false;
+    public bool Red = false;
+    public bool Green = false;
+    public bool Purple = false;
+    public bool Brown = false;
+    public bool Skull = false;
 
 
     // Use this for initialization
@@ -105,6 +116,7 @@ public class Gem : MonoBehaviour {
             transform.position = tempPosition;
 
         }
+
     }
 
     public IEnumerator CheckMoveCo() {
@@ -140,7 +152,11 @@ public class Gem : MonoBehaviour {
             if (board.play) {
                 CalculateAngle();
             } else {
-                Destroy(board.allGems[column, row]);
+                if (board.allGems[column, row]!=null) {
+                    Destroy(board.allGems[column, row]);
+                }
+                board.allGems[column, row] = null;
+
                 board.allGems[column, row] = board.SelectedGem(column, row);
             }
             

@@ -6,8 +6,8 @@ using System.Linq;
 public class FindMatches : MonoBehaviour {
 
     private Board board;
-    private const string WILDCARD = "Wildcard Gem";
     private const string SKULL5 = "Skull5 Gem";
+    private const string WILDCARD = "Wildcard Gem";
     private const string SKULL = "Skull Gem";
     private const string RED = "Red Gem";
     private const string BLUE = "Blue Gem";
@@ -16,52 +16,325 @@ public class FindMatches : MonoBehaviour {
     private const string BROWN = "Brown Gem";
     private const string GREEN = "Green Gem";
 
-    private const string WISH = "Wish Gem";
-    private const string GREMLIN= "Gremlin Gem";
-    private const string UMBRAL = "UmbralStar Gem";
-    private const string ELEMENTAL = "ElementalStar Gem";
-
-
-
     public List<GameObject> currentMatches = new List<GameObject>();
+    private List<GameObject> match4Plus = new List<GameObject>();
+
+
+
 
     // Use this for initialization
     void Start() {
         board = FindObjectOfType<Board>();
+    }
+   public void CheckMatch4Plus(ref Match4PlusMoves move) {
+        move.count = 0;
+        bool moveFound = false;
+        for (int x = 0; x < board.width; x++) {
+            for (int y = 0; y < board.height; y++) {
+                if (!moveFound && board.allGems[x, y] != null) {
+                    CheckCross(x, y, ref move);
+                    CheckL(x, y, ref move);
+                    CheckBackwardsL(x, y, ref move);
+                    CheckUpsideDownL(x, y, ref move);
+                    CheckUpsideDownBackWardsL(x, y, ref move);
+                    CheckRight(x, y, ref move);
+                    CheckLeft(x, y, ref move);
+                    CheckUp(x, y, ref move);
+                    CheckDown(x, y, ref move);
+                    CheckT(x, y, ref move);
+                    CheckupSideDownT(x, y, ref move);
+                    if (move.count > 3) {
+                        Debug.Log("foundMove at x= "+x+", y ="+y );
+                        moveFound = true;
+                    } else {
+                        move.Clear();
+                    }
+                }
+            }
+        }
+        match4Plus.Clear();
+    }
+    private void CheckT(int x, int y, ref Match4PlusMoves move) {
+        if ((x + 1 < board.width && x - 1 >= 0) && (y - 2 >= 0) &&
+            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x + 1, y], board.allGems[x-1, y], ref move) ) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y - 1], ref move);
+            AddMove(board.allGems[x, y - 2], ref move);
+            AddMove(board.allGems[x + 1, y], ref move);
+            AddMove(board.allGems[x - 1, y], ref move);
+            CheckRight(x, y, ref move);
+            CheckLeft(x, y, ref move);
+            CheckDown(x, y, ref move);
+            Debug.Log("move.count = " + move.count);
+        }
+    }
+
+    private void CheckupSideDownT(int x, int y, ref Match4PlusMoves move) {
+        if ((x + 1 < board.width && x - 1 >= 0) && (y + 2 < board.height) &&
+            SpecialGems5(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], board.allGems[x + 1, y], board.allGems[x - 1, y], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y + 1], ref move);
+            AddMove(board.allGems[x, y + 2], ref move);
+            AddMove(board.allGems[x + 1, y], ref move);
+            AddMove(board.allGems[x - 1, y], ref move);
+            CheckRight(x, y, ref move);
+            CheckUp(x, y, ref move);
+            CheckLeft(x, y, ref move);
+            Debug.Log("move.count = " + move.count);
+        }
+    }
+    private void CheckL(int x, int y, ref Match4PlusMoves move) {
+        if ((x + 2 < board.width) && (y + 2 < board.height) &&
+            SpecialGems5(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], board.allGems[x + 1, y], board.allGems[x + 2, y], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y+1], ref move);
+            AddMove(board.allGems[x, y + 2], ref move);
+            AddMove(board.allGems[x + 1, y], ref move);
+            AddMove(board.allGems[x + 2, y], ref move);
+            CheckRight(x, y, ref move);
+            CheckUp(x, y, ref move);
+            Debug.Log("move.count = "+move.count);
+        }
+    }
+    private void CheckUpsideDownBackWardsL(int x, int y, ref Match4PlusMoves move) {
+        if ((x - 2 >=0) && (y - 2 >=0) &&
+            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x - 1, y], board.allGems[x - 2, y], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y - 1], ref move);
+            AddMove(board.allGems[x, y - 2], ref move);
+            AddMove(board.allGems[x - 1, y], ref move);
+            AddMove(board.allGems[x - 2, y], ref move);
+            CheckLeft(x, y, ref move);
+            CheckDown(x, y, ref move);
+        }
+    }
+
+    private void CheckUpsideDownL(int x, int y, ref Match4PlusMoves move) {
+        if ((x + 2 < board.width) && (y - 2 >= 0) &&
+            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x + 1, y], board.allGems[x +2, y], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y - 1], ref move);
+            AddMove(board.allGems[x, y - 2], ref move);
+            AddMove(board.allGems[x + 1, y], ref move);
+            AddMove(board.allGems[x + 2, y], ref move);
+            CheckRight(x, y, ref move);
+            CheckDown(x, y, ref move);
+        }
+    }
+
+    private void CheckBackwardsL(int x, int y, ref Match4PlusMoves move) {
+        if ((x - 2 >=0) && (y + 2 < board.height) &&
+            SpecialGems3(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], ref move) &&
+            SpecialGems3(board.allGems[x, y], board.allGems[x - 1, y], board.allGems[x - 2, y], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y + 1], ref move);
+            AddMove(board.allGems[x, y + 2], ref move);
+            AddMove(board.allGems[x - 1, y], ref move);
+            AddMove(board.allGems[x - 2, y], ref move);
+            CheckLeft(x, y, ref move);
+            CheckUp(x, y, ref move);
+        }
+    }
+
+
+
+    private void CheckCross(int x,int y,ref Match4PlusMoves move) {
+        if ((x - 1 >= 0 && x + 1 < board.width) && (y - 1 >= 0 && y + 1 < board.height) &&
+            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y + 1 ], board.allGems[x + 1, y], board.allGems[x - 1, y], ref move)) {
+            AddMove(board.allGems[x, y + 1],ref move);
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y - 1], ref move);
+            AddMove(board.allGems[x + 1, y],ref  move);
+            AddMove(board.allGems[x - 1, y], ref move);
+            CheckRight(x - 1, y, ref move);
+            CheckLeft(x + 1, y, ref move);
+            CheckUp(x, y - 1, ref move);
+            CheckDown(x, y + 1, ref move);
+        }
+    }
+    private void CheckRight(int x, int y, ref Match4PlusMoves move) {
+        while (x + 3 < board.height && SpecialGems4(board.allGems[x, y], board.allGems[x + 1, y], board.allGems[x + 2, y], board.allGems[x + 3, y], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x+1, y], ref move);
+            AddMove(board.allGems[x+2, y], ref move);
+            AddMove(board.allGems[x + 3, y], ref move);
+            x++;
+        }
+    }
+    private void CheckLeft(int x, int y, ref Match4PlusMoves move) {
+        while (x -3 >=0 && SpecialGems4(board.allGems[x, y], board.allGems[x - 1, y], board.allGems[x - 2, y], board.allGems[x - 3, y], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x - 1, y], ref move);
+            AddMove(board.allGems[x - 2, y], ref move);
+            AddMove(board.allGems[x - 3, y], ref move);
+            x++;
+        }
+    }
+    private void CheckUp(int x, int y, ref Match4PlusMoves move) {
+        while (y+3<board.height && SpecialGems4(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], board.allGems[x, y + 3], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y + 1], ref move);
+            AddMove(board.allGems[x, y + 2], ref move);
+            AddMove(board.allGems[x, y + 3], ref move);
+            x++;
+        }
+    }
+    private void CheckDown(int x, int y, ref Match4PlusMoves move) {
+        while (y -3 >= 0 && SpecialGems4(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x, y - 3], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y - 1], ref move);
+            AddMove(board.allGems[x, y - 2], ref move);
+            AddMove(board.allGems[x, y - 3], ref move);
+            x++;
+        }
+    }
+    private void AddMove(GameObject gem, ref Match4PlusMoves move) {
+        if (!match4Plus.Contains(gem)) {
+            match4Plus.Add(gem);
+            move.count++;
+            AddColor(gem, ref move);
+        }
+    }
+    private void AddColor(GameObject gem,ref Match4PlusMoves move) {
+        if (move.color != null) {
+            switch (move.color) {
+                case BLUE:
+                    move.blue++;
+                    break;
+                case YELLOW:
+                    move.yellow++;
+                    break;
+                case RED:
+                    move.red++;
+                    break;
+                case SKULL:
+                    if (gem.tag ==SKULL5) {
+                        move.skull5++;
+                    } else {
+                        move.skull++;
+                    }                    
+                    break;
+                case GREEN:
+                    move.green++;
+                    break;
+                case PURPLE:
+                    move.purple++;
+                    break;
+                case BROWN:
+                    move.brown++;
+                    break;
+            }
+        }
+    }
+    private bool SpecialGems5(GameObject gem1, GameObject gem2, GameObject gem3, GameObject gem4, GameObject gem5, ref Match4PlusMoves move) {
+        if (gem1 != null && gem2 != null && gem3 != null && gem4 != null && gem5!=null) {
+            if (gem1.GetComponent<Gem>().Blue && gem2.GetComponent<Gem>().Blue && gem3.GetComponent<Gem>().Blue && gem4.GetComponent<Gem>().Blue && gem5.GetComponent<Gem>().Blue) {
+                move.color = BLUE;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Yellow && gem2.GetComponent<Gem>().Yellow && gem3.GetComponent<Gem>().Yellow && gem4.GetComponent<Gem>().Yellow && gem5.GetComponent<Gem>().Yellow) {
+                move.color = YELLOW;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Red && gem2.GetComponent<Gem>().Red && gem3.GetComponent<Gem>().Red && gem4.GetComponent<Gem>().Red && gem5.GetComponent<Gem>().Red) {
+                move.color = RED;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Brown && gem2.GetComponent<Gem>().Brown && gem3.GetComponent<Gem>().Brown && gem4.GetComponent<Gem>().Brown && gem5.GetComponent<Gem>().Brown) {
+                move.color = BROWN;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Purple && gem2.GetComponent<Gem>().Purple && gem3.GetComponent<Gem>().Purple && gem4.GetComponent<Gem>().Purple && gem5.GetComponent<Gem>().Purple) {
+                move.color = PURPLE;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Green && gem2.GetComponent<Gem>().Green && gem3.GetComponent<Gem>().Green && gem4.GetComponent<Gem>().Green && gem5.GetComponent<Gem>().Green) {
+                move.color = GREEN;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Skull && gem2.GetComponent<Gem>().Skull && gem3.GetComponent<Gem>().Skull && gem4.GetComponent<Gem>().Skull && gem5.GetComponent<Gem>().Skull) {
+                move.color = SKULL;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool SpecialGems4(GameObject gem1, GameObject gem2, GameObject gem3, GameObject gem4, ref Match4PlusMoves move) {
+        if (gem1 != null && gem2 != null && gem3 != null && gem4 != null) {
+            if (gem1.GetComponent<Gem>().Blue && gem2.GetComponent<Gem>().Blue && gem3.GetComponent<Gem>().Blue && gem4.GetComponent<Gem>().Blue) {
+                move.color = BLUE;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Yellow && gem2.GetComponent<Gem>().Yellow && gem3.GetComponent<Gem>().Yellow && gem4.GetComponent<Gem>().Yellow) {
+                move.color = YELLOW;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Red && gem2.GetComponent<Gem>().Red && gem3.GetComponent<Gem>().Red && gem4.GetComponent<Gem>().Red) {
+                move.color = RED;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Brown && gem2.GetComponent<Gem>().Brown && gem3.GetComponent<Gem>().Brown && gem4.GetComponent<Gem>().Brown) {
+                move.color = BROWN;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Purple && gem2.GetComponent<Gem>().Purple && gem3.GetComponent<Gem>().Purple && gem4.GetComponent<Gem>().Purple) {
+                move.color = PURPLE;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Green && gem2.GetComponent<Gem>().Green && gem3.GetComponent<Gem>().Green && gem4.GetComponent<Gem>().Green) {
+                move.color = GREEN;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Skull && gem2.GetComponent<Gem>().Skull && gem3.GetComponent<Gem>().Skull && gem4.GetComponent<Gem>().Skull) {
+                move.color = SKULL;
+                return true;
+            }
+        }
+
+        return false;
+    }
+    private bool SpecialGems3(GameObject gem1, GameObject gem2, GameObject gem3, ref Match4PlusMoves move) {
+        if (gem1 != null && gem2 != null && gem3 != null) {
+            if (gem1.GetComponent<Gem>().Blue && gem2.GetComponent<Gem>().Blue && gem3.GetComponent<Gem>().Blue) {
+                move.color = BLUE;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Yellow && gem2.GetComponent<Gem>().Yellow && gem3.GetComponent<Gem>().Yellow) {
+                move.color = YELLOW;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Red && gem2.GetComponent<Gem>().Red && gem3.GetComponent<Gem>().Red) {
+                move.color = RED;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Brown && gem2.GetComponent<Gem>().Brown && gem3.GetComponent<Gem>().Brown) {
+                move.color = BROWN;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Purple && gem2.GetComponent<Gem>().Purple && gem3.GetComponent<Gem>().Purple) {
+                move.color = PURPLE;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Green && gem2.GetComponent<Gem>().Green && gem3.GetComponent<Gem>().Green) {
+                move.color = GREEN;
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Skull && gem2.GetComponent<Gem>().Skull && gem3.GetComponent<Gem>().Skull) {
+                move.color = SKULL;
+                return true;
+            }
+        }
+        return false;
     }
 
     public void FindAllMatches() {
         StartCoroutine(FindAllMatchesCo());
     }
 
-    private List<GameObject> IsRowBomb(Gem gem1, Gem gem2, Gem gem3) {
-        List<GameObject> currentGems = new List<GameObject>();
-        if (gem1.isRowBomb) {
-            currentMatches.Union(GetRowPieces(gem1.row));
-        }
-        if (gem2.isRowBomb) {
-            currentMatches.Union(GetRowPieces(gem2.row));
-        }
-        if (gem3.isRowBomb) {
-            currentMatches.Union(GetRowPieces(gem3.row));
-        }
-        return currentGems;
-    }
-
-    private List<GameObject> IsColumnBomb(Gem gem1, Gem gem2, Gem gem3) {
-        List<GameObject> currentGems = new List<GameObject>();
-        if (gem1.isColumnBomb) {
-            currentMatches.Union(GetColumnPieces(gem1.column));
-        }
-
-        if (gem2.isColumnBomb) {
-            currentMatches.Union(GetColumnPieces(gem2.column));
-        }
-
-        if (gem3.isColumnBomb) {
-            currentMatches.Union(GetColumnPieces(gem3.column));
-        }
-        return currentGems;
+    public void FindAllMatchesCheck() {
+       FindAllMatchesNoCo();
     }
 
     private void AddToListAndMatch(GameObject gem) {
@@ -70,6 +343,10 @@ public class FindMatches : MonoBehaviour {
         }
 
         gem.GetComponent<Gem>().isMatched = true;
+    }
+    public void BlowUpBlock(int x, int y) {
+        AddToListAndMatch(board.allGems[x, y]);
+        BlowupBlock(x, y);
     }
     private void BlowupBlock(int x, int y) {
         int left = x - 1;
@@ -199,11 +476,92 @@ public class FindMatches : MonoBehaviour {
 
 
     }
-
     private void GetNearbyPieces(GameObject gem1, GameObject gem2, GameObject gem3) {
         AddToListAndMatch(gem1);
         AddToListAndMatch(gem2);
         AddToListAndMatch(gem3);
+    }
+
+    private void FindAllMatchesNoCo() {
+        for (int i = 0; i < board.width; i++) {
+            for (int j = 0; j < board.height; j++) {
+                GameObject currentGem = null;
+                if (board.allGems[i, j] != null) {
+                    currentGem = board.allGems[i, j];
+                }
+                Gem currentGemGem = null;
+                if (currentGem != null && currentGem.GetComponent<Gem>()) {
+                    currentGemGem = currentGem.GetComponent<Gem>();
+                }
+                if (currentGem != null) {
+                    if (i > 0 && i < board.width - 1) {
+                        GameObject leftGem = null;
+                        if (board.allGems[i - 1, j] != null) {
+                            leftGem = board.allGems[i - 1, j];
+                        }
+                        Gem leftGemGem = null;
+                        if (leftGem != null && leftGem.GetComponent<Gem>() != null) {
+                            leftGemGem = leftGem.GetComponent<Gem>();
+                        }
+                        GameObject rightGem = null;
+                        if (board.allGems[i + 1, j] != null) {
+                            rightGem = board.allGems[i + 1, j];
+                        }
+                        Gem rightGemGem = null;
+                        if (rightGem != null && rightGem.GetComponent<Gem>() != null) {
+                            rightGemGem = rightGem.GetComponent<Gem>();
+                        }
+
+                        if (leftGem != null && rightGem != null) {
+                            if (SpecialGems3(leftGem, rightGem, currentGem)) {
+
+                                //currentMatches.Union(IsRowBomb(leftGemGem, currentGemGem, rightGemGem));
+
+                                //currentMatches.Union(IsColumnBomb(leftGemGem, currentGemGem, rightGemGem));
+                                Skull5Match(leftGem, i - 1, j, currentGem, i, j, rightGem, i + 1, j);
+                                GetNearbyPieces(leftGem, currentGem, rightGem);
+
+
+                            }
+                        }
+                    }
+                    if (j > 0 && j < board.height - 1) {
+                        GameObject upGem = null;
+                        if (board.allGems[i, j + 1] != null) {
+                            upGem = board.allGems[i, j + 1];
+                        }
+                        if (board.allGems[i, j + 1] != null) {
+                            upGem = board.allGems[i, j + 1];
+                        }
+
+                        Gem upGemGem = null;
+                        if (upGem != null && upGem.GetComponent<Gem>() != null) {
+                            upGemGem = upGem.GetComponent<Gem>();
+                        }
+                        GameObject downGem = null;
+                        if (board.allGems[i, j - 1] != null) {
+                            downGem = board.allGems[i, j - 1];
+                        }
+
+                        Gem downGemGem = null;
+                        if (downGem != null && downGem.GetComponent<Gem>() != null) {
+                            downGemGem = downGem.GetComponent<Gem>();
+                        }
+                        if (upGem != null && downGem != null) {
+                            if (SpecialGems3(upGem, downGem, currentGem)) {
+                                //currentMatches.Union(IsColumnBomb(upGemGem, currentGemGem, downGemGem));
+                                //currentMatches.Union(IsRowBomb(upGemGem, currentGemGem, downGemGem));
+                                Skull5Match(upGem, i, j + 1, currentGem, i, j, downGem, i, j - 1);
+                                GetNearbyPieces(upGem, currentGem, downGem);
+
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
     }
 
     private IEnumerator FindAllMatchesCo() {
@@ -238,7 +596,7 @@ public class FindMatches : MonoBehaviour {
                         }
 
                         if (leftGem != null && rightGem != null) {
-                            if (SpecialGems( leftGem,  rightGem,  currentGem)) {
+                            if (SpecialGems3( leftGem,  rightGem,  currentGem)) {
 
                                 //currentMatches.Union(IsRowBomb(leftGemGem, currentGemGem, rightGemGem));
 
@@ -273,7 +631,7 @@ public class FindMatches : MonoBehaviour {
                             downGemGem = downGem.GetComponent<Gem>();
                         }                        
                         if (upGem != null && downGem != null) {
-                            if (SpecialGems(upGem, downGem, currentGem)) {
+                            if (SpecialGems3(upGem, downGem, currentGem)) {
                                 //currentMatches.Union(IsColumnBomb(upGemGem, currentGemGem, downGemGem));
                                 //currentMatches.Union(IsRowBomb(upGemGem, currentGemGem, downGemGem));
                                 Skull5Match(upGem,i,j+1 , currentGem,i,j, downGem, i, j-1);
@@ -288,286 +646,31 @@ public class FindMatches : MonoBehaviour {
         }
 
     }
-
-    public void MatchPiecesOfColor(string color) {
-        for (int i = 0; i < board.width; i++) {
-            for (int j = 0; j < board.height; j++) {
-                //Check if that piece exists
-                if (board.allGems[i, j] != null) {
-                    //Check the tag on that gem
-                    if (board.allGems[i, j].tag == color) {
-                        //Set that gem to be matched
-                        board.allGems[i, j].GetComponent<Gem>().isMatched = true;
-                    }
-                }
+    private bool SpecialGems3(GameObject gem1, GameObject gem2, GameObject gem3) {
+        if (gem1 != null && gem2 != null && gem3 != null) {
+            if (gem1.GetComponent<Gem>().Blue && gem2.GetComponent<Gem>().Blue && gem3.GetComponent<Gem>().Blue) {
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Yellow && gem2.GetComponent<Gem>().Yellow && gem3.GetComponent<Gem>().Yellow) {
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Red && gem2.GetComponent<Gem>().Red && gem3.GetComponent<Gem>().Red) {
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Brown && gem2.GetComponent<Gem>().Brown && gem3.GetComponent<Gem>().Brown) {
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Purple && gem2.GetComponent<Gem>().Purple && gem3.GetComponent<Gem>().Purple) {
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Green && gem2.GetComponent<Gem>().Green && gem3.GetComponent<Gem>().Green) {
+                return true;
+            }
+            if (gem1.GetComponent<Gem>().Skull && gem2.GetComponent<Gem>().Skull && gem3.GetComponent<Gem>().Skull) {
+                return true;
             }
         }
-    }
-
-    private bool SpecialGems(GameObject gem1, GameObject gem2, GameObject currentGem) {
-        if (Wildcard(gem1, gem2, currentGem)) {  
-            return true;
-        }
-        if (ElementalStarGem(gem1, gem2, currentGem)) {
-            return true;
-        }
-        if (UmbralStarGem(gem1, gem2, currentGem)) {
-            return true;
-        }
-
-        if (Skull5(gem1, gem2, currentGem)) {
-            return true;
-        }
-        if(WishGem(gem1, gem2, currentGem)) {
-            return false;
-        }
-        if (GremlinGem(gem1, gem2, currentGem)) {
-            return false;
-        }
-
-        if (gem1.tag == currentGem.tag && gem2.tag == currentGem.tag) {
-            return true;
-        }
         return false;
-    }
-    private bool WishGem(GameObject gem1, GameObject gem2, GameObject currentGem) {
-        if (gem1.tag == WISH || gem2.tag == WISH || currentGem.tag == WISH) {
-            return true;
-        }
-        return false;
-    }
-    private bool UmbralStarGem(GameObject gem1, GameObject gem2, GameObject currentGem) {
-        if (NotSkullAndIsUmbralGem(currentGem, gem2) && (currentGem.tag == gem2.tag && gem1.tag == UMBRAL)) {
-            return true;
-        }
-        if (currentGem.tag == UMBRAL && NotSkullAndIsUmbralGem(gem1, gem2) && gem1.tag == gem2.tag) {
-            return true;
-        }
-        if (gem2.tag == UMBRAL && gem1.tag == currentGem.tag && NotSkullAndIsUmbralGem(gem1, currentGem)) {
-            return true;
-        }
-        if (currentGem.tag == UMBRAL && gem2.tag == UMBRAL && UmbralGems(gem1.tag)) {
-            return true;
-        }
-        if (UmbralGems(currentGem.tag) && gem1.tag == UMBRAL && gem2.tag == UMBRAL) {
-            return true;
-        }
-        if (UmbralGems(gem2.tag) && gem1.tag == UMBRAL && currentGem.tag == UMBRAL) {
-            return true;
-        }
-
-        return false;
-    }
-    private bool UmbralGems(string gem) {
-        if ( gem == PURPLE || gem == YELLOW) {
-            return true;
-        }
-
-        return false;
-
-    }
-    private bool ElementalGems(string gem) {
-        if (gem == BLUE || gem == BROWN || gem == RED ||  gem == GREEN ) {
-            return true;
-        }
-
-        return false;
-
-    }
-
-    private bool ElementalStarGem(GameObject gem1, GameObject gem2, GameObject currentGem) {
-        if (NotSkullAndIsElementalGem(currentGem, gem2) && ( currentGem.tag == gem2.tag && gem1.tag == ELEMENTAL)) {
-            return true;
-        }
-        if (currentGem.tag == ELEMENTAL && NotSkullAndIsElementalGem(gem1,gem2) && gem1.tag == gem2.tag) {
-            return true;
-        }
-        if (gem2.tag == ELEMENTAL && gem1.tag == currentGem.tag  && NotSkullAndIsElementalGem(gem1, currentGem)) {
-            return true;
-        }
-        if (currentGem.tag == ELEMENTAL && gem2.tag == ELEMENTAL && ElementalGems(gem1.tag)) {
-            return true;
-        }
-        if (ElementalGems(currentGem.tag) && gem1.tag == ELEMENTAL && gem2.tag == ELEMENTAL) {
-            return true;
-        }
-        if (ElementalGems(gem2.tag) && gem1.tag == ELEMENTAL && currentGem.tag == ELEMENTAL) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private bool NotSkull(GameObject gem1, GameObject gem2) {
-        if (gem1.tag != SKULL || gem2.tag != SKULL) {
-            return true;
-        }
-        return false;
-    }
-    private bool NotSkullAndIsElementalGem(GameObject gem1, GameObject gem2) {
-        if (NotSkull(gem1,gem2) && (ElementalGems(gem1.tag) && ElementalGems(gem2.tag))) {
-            return true;
-        }
-        return false;
-    }
-
-    private bool NotSkullAndIsUmbralGem(GameObject gem1, GameObject gem2) {
-        if (NotSkull(gem1, gem2) && (UmbralGems(gem1.tag) && UmbralGems(gem2.tag))) {
-            return true;
-        }
-        return false;
-    }
-
-    private bool GremlinGem(GameObject gem1, GameObject gem2, GameObject currentGem) {
-        if (gem1.tag == GREMLIN || gem2.tag == GREMLIN || currentGem.tag == GREMLIN) {
-            return true;
-        }
-        return false;
-    }
-
-    private bool Wildcard(GameObject gem1, GameObject gem2, GameObject currentGem) {
-        if (NotSkull(currentGem, gem2) && (currentGem.tag == gem2.tag && gem1.tag == WILDCARD)) {
-            return true;
-        }
-        if (currentGem.tag == WILDCARD && NotSkull(gem1, gem2) && gem1.tag == gem2.tag) {
-            return true;
-        }
-        if (gem2.tag == WILDCARD && gem1.tag == currentGem.tag && NotSkull(gem1, currentGem)) {
-            return true;
-        }
-        if (currentGem.tag == WILDCARD && gem2.tag == WILDCARD && WildcardGems(gem1.tag)) {
-            return true;
-        }
-        if (WildcardGems(currentGem.tag) && gem1.tag == WILDCARD && gem2.tag == WILDCARD) {
-            return true;
-        }
-        if (WildcardGems(gem2.tag) && gem1.tag == WILDCARD && currentGem.tag == WILDCARD) {
-            return true;
-        }
-
-        return false;
-    }
-
-
-    private bool Skull5(GameObject gem1, GameObject gem2, GameObject currentGem) {
-        if (currentGem.tag == SKULL && gem2.tag ==SKULL && gem1.tag == SKULL5) {
-            return true;
-        }
-        if (currentGem.tag == SKULL5 && gem1.tag == SKULL && gem2.tag == SKULL) {
-            return true;
-        }
-        if (gem2.tag == SKULL5 && gem1.tag == SKULL && currentGem.tag == SKULL) {
-            return true;
-        }
-        if (currentGem.tag == SKULL5 && gem2.tag == SKULL5 && gem1.tag == SKULL) {
-            return true;
-        }
-        if (currentGem.tag== SKULL && gem1.tag == SKULL5 && gem2.tag == SKULL5) {
-            return true;
-        }
-        if (gem2.tag == SKULL && gem1.tag == SKULL5 && currentGem.tag == SKULL5) {
-            return true;
-        }
-
-        return false;
-    }
-
-
-
-
-    private bool WildcardGems(string gem) {
-        if (gem == BLUE || gem == BROWN || gem == RED || gem == PURPLE || gem == GREEN || gem == YELLOW  ) {
-            return true;
-        }
-
-        return false;
-
-    }
-
-
-    List<GameObject> GetColumnPieces(int column) {
-        List<GameObject> gems = new List<GameObject>();
-        for (int i = 0; i < board.height; i++) {
-            if (board.allGems[column, i] != null) {
-                gems.Add(board.allGems[column, i]);
-                board.allGems[column, i].GetComponent<Gem>().isMatched = true;
-            }
-        }
-        return gems;
-    }
-
-    List<GameObject> GetRowPieces(int row) {
-        List<GameObject> gems = new List<GameObject>();
-        for (int i = 0; i < board.width; i++) {
-            if (board.allGems[i, row] != null) {
-                gems.Add(board.allGems[i, row]);
-                board.allGems[i, row].GetComponent<Gem>().isMatched = true;
-            }
-        }
-        return gems;
-    }
-
-    public void CheckBombs() {
-        //Did the player move something?
-        /*
-        if (board.currentGem != null) {
-            //Is the piece they moved matched?
-            if (board.currentGem.isMatched) {
-                //make it unmatched
-                board.currentGem.isMatched = false;
-                //Decide what kind of bomb to make
-                
-                int typeOfBomb = Random.Range(0, 100);
-                if(typeOfBomb < 50){
-                    //Make a row bomb
-                    board.currentGem.MakeRowBomb();
-                }else if(typeOfBomb >= 50){
-                    //Make a column bomb
-                    board.currentGem.MakeColumnBomb();
-                }
-                
-                if ((board.currentGem.swipeAngle > -45 && board.currentGem.swipeAngle <= 45)
-                   || (board.currentGem.swipeAngle < -135 || board.currentGem.swipeAngle >= 135)) {
-                    //board.currentGem.MakeRowBomb();
-                } else {
-                    //board.currentGem.MakeColumnBomb();
-                }
-            }
-            //Is the other piece matched?
-            else if (board.currentGem.otherGem != null) {
-                Gem otherGem = null;
-                if (board.currentGem.otherGem.GetComponent<Gem>() != null) {
-                    otherGem = board.currentGem.otherGem.GetComponent<Gem>();
-                }
-                //Is the other Gem matched?
-                if (otherGem != null && otherGem.isMatched) {
-                    //Make it unmatched
-                    otherGem.isMatched = false;
-                    
-                    //Decide what kind of bomb to make
-                    int typeOfBomb = Random.Range(0, 100);
-                    if (typeOfBomb < 50)
-                    {
-                        //Make a row bomb
-                        otherGem.MakeRowBomb();
-                    }
-                    else if (typeOfBomb >= 50)
-                    {
-                        //Make a column bomb
-                        otherGem.MakeColumnBomb();
-                    }
-                    
-                    if ((board.currentGem.swipeAngle > -45 && board.currentGem.swipeAngle <= 45)
-                   || (board.currentGem.swipeAngle < -135 || board.currentGem.swipeAngle >= 135)) {
-                        otherGem.MakeRowBomb();
-                    } else {
-                        otherGem.MakeColumnBomb();
-                    }
-                }
-            }
-
-        }
-        */
     }
 
 }
