@@ -489,21 +489,21 @@ public class FindMatches : MonoBehaviour {
     }
 
     private void CheckForSkull5(int x, int y) {
-        if (board.allGems[x,y].tag == SKULL5) {
+        if (board.allGems[x,y].tag == SKULL5 || board.allGems[x, y].GetComponent<Gem>().explodable) {
             BlowupBlock(x,y);
         }
     }
 
     private void Skull5Match(GameObject gem1,int i1, int j1, GameObject gem2, int i2 ,int j2, GameObject gem3, int i3, int j3) {
-        if (gem1.tag == SKULL5) {
+        if (gem1.tag == SKULL5 || gem1.GetComponent<Gem>().explodable) {
             BlowupBlock(i1,j1);
         }
 
-        if (gem2.tag == SKULL5) {
+        if (gem2.tag == SKULL5 || gem2.GetComponent<Gem>().explodable) {
             BlowupBlock( i2, j2);
         }
 
-        if (gem3.tag == SKULL5) {
+        if (gem3.tag == SKULL5 || gem3.GetComponent<Gem>().explodable) {
             BlowupBlock(i3, j3);
         }
 
