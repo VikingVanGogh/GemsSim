@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using SmartDLL;
 using UnityEngine.SceneManagement;
 using UnityEditor;
+using TMPro;
 
 
 
@@ -15,13 +16,18 @@ public class FileManager : MonoBehaviour
     string configPath ="Assets/Config/Config.txt";
     public Text eText;
     public RawImage image;
-    public Image image2;
+    public RawImage rawImage2;
     public Color color = Color.red;
     public Color[,] colors;
     public Board board;
     UpdateColor boardColor;
     public GameObject[,] allGems;
     public GemTypes[,] gems;
+    public Button b1;
+    public TextMeshProUGUI b1text;
+
+    public bool hidden = true;
+    public GameObject gameImage;
 
     public int width;
     public int height;
@@ -69,18 +75,23 @@ public class FileManager : MonoBehaviour
 
     private string Cleanup(string s) {
         bool done =false;
-        int i = s.Length;
-        if (s.Length == 0) {
-            return "";
-        }
-        while ( i > 0 && !done) {
-            s = s[..^1];
-            //Debug.Log(s);
-            if (s.Length-1 >0 && s[s.Length - 1] == '\\') {
-                done = true;
+        if (s != null) {
+            int i = s.Length;
+            if (s.Length == 0) {
+                return "";
             }
-            i--;
+            while (i > 0 && !done) {
+                s = s[..^1];
+                //Debug.Log(s);
+                if (s.Length - 1 > 0 && s[s.Length - 1] == '\\') {
+                    done = true;
+                }
+                i--;
+            }
+        } else {
+            s= "C:/";
         }
+
         return s;
     }
 
@@ -92,9 +103,27 @@ public class FileManager : MonoBehaviour
 
         }
     }
+
+    public void HideShowImage() {
+        if (hidden) {
+            gameImage.SetActive(true);
+            hidden = false;
+            b1text.text = "Hide Image";
+        } else {
+            gameImage.SetActive(false);
+            hidden = true;
+            b1text.text = "Show Image";
+        }
+    }
+
+
+    // This function takes a 16x9, preferably 1920x1080, if it is not it will be scaled to 1920x1080.
+    // It then looks in a grid pattern (hopefully dead center of where each gem should be located) 
+    // and sets the 2d array of allGems[,] from the board class using a series of functions
     void UpdateImage() {
         WWW www = new WWW("file://" + path);
         image.texture = www.texture;
+        rawImage2.texture = www.texture;
 
         Texture2D img = (Texture2D)image.texture;
         img = Resize(img, 1920, 1080);
@@ -105,83 +134,234 @@ public class FileManager : MonoBehaviour
         img = FlipTexture(img);
 
         Debug.Log("setting colors");
-        float xOffset = 0;
-        double yOffset = 0;
+        int xOffset = 0;
+        int xValue = 544; //was 550
+        int yValue = 972;
+        int yOffset = 0;
         colors = new Color[board.width, board.height];
         gems = new GemTypes[board.width, board.height];
         string str ="";
         for (int x = 0; x < board.width; x++) {
             xOffset  =0;
             for (int y =0; y < board.height ; y++){
-                Color pixel = img.GetPixel(550+(int) xOffset, 960 + (int)yOffset);
+                Color pixel = img.GetPixel(xValue + xOffset, yValue + yOffset);
                 GemTypes tmpGem = SetGem(pixel, ref str);
-                if (tmpGem  == GemTypes.Skull) {
-                    Color pixel2 = img.GetPixel(550 + (int)xOffset -33, 960 + (int)yOffset);
-                    Color pixel3 = img.GetPixel(550 + (int)xOffset + 33, 960 + (int)yOffset);
-                    //Debug.Log(" pixel2 = " + SetGem(pixel2, ref str) + ", str = " + str + ", Pixel3 = " + SetGem(pixel3, ref str) + " str  =" + str);
-                    if (SetGem(pixel2, ref str) == GemTypes.Purple && SetGem(pixel3, ref str) ==GemTypes.Yellow) {
-                        
-                        tmpGem = GemTypes.WildCard;
-                    }
+                if (tmpGem == GemTypes.Black) {
+                    tmpGem = GemTypes.Gremlin;
                 }
-
-                if (tmpGem == GemTypes.Skull) {
-                    Color pixel2 = img.GetPixel(550 - 25 + (int)xOffset , 960 + 15 + (int)yOffset);
-                   // Debug.Log(" x = " +(550-20 + (int)xOffset) + ", " +(960 + 15 + (int)yOffset) );
-                   // Debug.Log(" pixel2 = " + SetGem(pixel2, ref str) + ", str = " + str );
-
-                    if (SetGem(pixel2, ref str) == GemTypes.Red || SetGem(pixel2, ref str) == GemTypes.Yellow || 
-                        SetGem(pixel2, ref str) == GemTypes.Brown || SetGem(pixel2, ref str) == GemTypes.Skull5) {
-
-                        tmpGem = GemTypes.Skull5;
-                    }
-                }
-
-                if (tmpGem == GemTypes.Block) {
-                    Color pixel2 = img.GetPixel(550 - 25 + (int)xOffset, 960 + 15 + (int)yOffset);
-                   // Debug.Log(" x = " + (550 - 20 + (int)xOffset) + ", " + (960 + 15 + (int)yOffset));
-                    //Debug.Log(" pixel2 = " + SetGem(pixel2, ref str) + ", str = " + str);
-                    if (SetGem(pixel2, ref str) == GemTypes.Green)  {
-
-                        tmpGem = GemTypes.Green;
-                    }
-                }
-
-                if (tmpGem == GemTypes.Purple) {
-                    Color pixel2 = img.GetPixel(550 - 25 + (int)xOffset, 960 + (int)yOffset);
-                    //Debug.Log(" x = " + (550 - 20 + (int)xOffset) + ", " + (960 + 15 + (int)yOffset));
-                    //Debug.Log(" pixel2 = " + SetGem(pixel2, ref str) + ", str = " + str);
-                    if (SetGem(pixel2, ref str) == GemTypes.Yellow) {
-
-                        tmpGem = GemTypes.UmbralStar;
-                    }
-                }
-
-                if (tmpGem == GemTypes.Blue) {
-                    Color pixel2 = img.GetPixel(550 - 25 + (int)xOffset, 960 + (int)yOffset);
-                   Debug.Log("Pixel,  x = " + (550 - 20 + (int)xOffset) + ", " + (960 + 15 + (int)yOffset));
-                   Debug.Log("Gem cord, x = " +x + ", y = "+ y +" BLUE pixel2 = " + SetGem(pixel2, ref str) + ", str = " + str);
-                    if (SetGem(pixel2, ref str) == GemTypes.Black) {
-
-                        tmpGem = GemTypes.ElementalStar;
-                    }
-                }
-
-
+                CheckWildCard(img, ref tmpGem, x, y, xValue + xOffset, yValue + yOffset);
+                CheckElementalStar(img, ref tmpGem, x, y, xValue + xOffset, yValue + yOffset);
+                CheckUmbralStar(img, ref tmpGem, x, y, xValue + xOffset, yValue + yOffset);                
+                CheckGiants(img, ref tmpGem, x, y, xValue + xOffset, yValue + yOffset);
+                CheckSkull5(img, ref tmpGem, x, y, xValue + xOffset, yValue + yOffset);
+                CheckRedGem(img, ref tmpGem, x, y, xValue + xOffset, yValue + yOffset);
                 gems[x, y] = tmpGem;
-                //Debug.Log("[x,y] gem = "+gems[x,y].ToString()+" , x = " +x + ", y = "+ y +", str = "+str );
+                SetGem(pixel, ref str);
+              
+                   Debug.Log("xValue+offset= "+(xValue + xOffset) + ", yValue+yOffset = " + (yValue + yOffset));
+                    //Debug.Log("[x,y] gem = " + tmpGem.ToString() + " , x = " + y + ", y = " + x + ", str = " + str);
+                
                 colors[x, y] = new Color();
                 colors[x,y] =  pixel;
-                xOffset +=118.57142857142857142857142857143f;
+                xOffset +=119;
             }
-            yOffset -= 118.57142857142857142857142857143f;
+            yOffset -= 119;
         }
         board.SetBoardColors(colors, gems);
     }
 
+    private void CheckWildCard( Texture2D img, ref GemTypes tmpGem, int x, int y, int xValue, int yValue) {
+        string str ="";
+        int xOffset1 = 33;
+        int yOffset1 = 6;
+        if (tmpGem == GemTypes.Skull|| tmpGem == GemTypes.WildCard || tmpGem == GemTypes.Skull5) {
+            Color pixel2 = img.GetPixel(xValue - xOffset1, yValue+ yOffset1);
+            Color pixel3 = img.GetPixel(xValue + xOffset1, yValue + yOffset1);
+            //Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = " + SetGem(pixel2, ref str).ToString()  + ", str = " + str);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel3 = " + SetGem(pixel3, ref str).ToString()  + ", str = " + str);
 
+            if (SetGem(pixel2, ref str) == GemTypes.Purple && SetGem(pixel3, ref str) == GemTypes.Yellow) {
+                tmpGem = GemTypes.WildCard;
+            }
+        }
+    }
+    private void CheckRedGem(Texture2D img, ref GemTypes tmpGem, int x, int y, int xValue, int yValue) {
+        string str = "";
+        int xOffset1 = 27;
+        int yOffset1 = 33;
+        int yOffset2 = 4;
+        if (tmpGem == GemTypes.Skull|| tmpGem == GemTypes.Skull5) {
+            Color pixel2 = img.GetPixel(xValue + xOffset1, yValue + yOffset2);
+            Color pixel3 = img.GetPixel(xValue + xOffset1, yValue + yOffset1);
+            //Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = " + SetGem(pixel2, ref str).ToString()  + ", str = " + str);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel3 = " + SetGem(pixel3, ref str).ToString()  + ", str = " + str);
+
+            if (SetGem(pixel2, ref str) == GemTypes.Red && SetGem(pixel3, ref str) == GemTypes.Red) {
+                tmpGem = GemTypes.Red;
+            }
+        }
+
+    }
+
+    private void CheckGiants(Texture2D img, ref GemTypes tmpGem, int x, int y, int xValue, int yValue) {
+        string str = "";
+        int xOffset1 = 37;
+        int yOffset1 = 0;
+        int xOffset2;
+        int yOffset2;
+        if (tmpGem == GemTypes.Skull) {
+            Color pixel2 = img.GetPixel(xValue - xOffset1, yValue );
+            Color pixel3 = img.GetPixel(xValue + xOffset1, yValue );
+            //Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = "+ SetGem(pixel2, ref str).ToString() + ", str = " + str);            
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel3 = "+ SetGem(pixel3, ref str).ToString() + ", str = " + str);
+
+            if (SetGem(pixel2, ref str) == GemTypes.Red && SetGem(pixel3, ref str) == GemTypes.Red) {
+                tmpGem = GemTypes.RedGiant;
+            }
+        }
+        if (tmpGem == GemTypes.Purple || tmpGem == GemTypes.Red) {
+
+            xOffset2 = 10;
+            yOffset2 = 15;
+
+            Color pixel4 = img.GetPixel(xValue + xOffset2, yValue + yOffset2);
+
+            //Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel4 = " + SetGem(pixel4, ref str).ToString() + ", str = " + str);
+
+            if (SetGem(pixel4, ref str) == GemTypes.Skull) {
+                tmpGem = GemTypes.PurpleGiant;
+            }
+        }
+        if (tmpGem == GemTypes.Skull) {
+               xOffset2 = 39;
+               yOffset2 = 15;
+            Color pixel2 = img.GetPixel(xValue - xOffset2, yValue - yOffset2);
+            Color pixel3 = img.GetPixel(xValue + xOffset2, yValue - yOffset2);
+           
+            //Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = " + SetGem(pixel2, ref str).ToString()  + ", str = " + str);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel3 = " + SetGem(pixel3, ref str).ToString()  + ", str = " + str);
+
+            if ((SetGem(pixel2, ref str) == GemTypes.Yellow|| SetGem(pixel2, ref str) == GemTypes.Red) && SetGem(pixel3, ref str) == GemTypes.Yellow ) {
+                tmpGem = GemTypes.YellowGiant;
+            }
+        }
+        if (tmpGem == GemTypes.Skull) {
+            xOffset2 = 39;
+            yOffset2 = 9;
+            Color pixel2 = img.GetPixel(xValue - xOffset2, yValue - yOffset2);
+            Color pixel3 = img.GetPixel(xValue + xOffset2, yValue - yOffset2);
+            //Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = " + SetGem(pixel2, ref str).ToString()  + ", str = " + str);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel3 = " + SetGem(pixel3, ref str).ToString()  + ", str = " + str);
+
+            if (SetGem(pixel2, ref str) == GemTypes.Green && SetGem(pixel3, ref str) == GemTypes.Green) {
+                tmpGem = GemTypes.GreenGiant;
+            }
+        }
+        if (tmpGem == GemTypes.Skull) {
+            xOffset2 = 27;
+            yOffset2 = 25;
+            int xOffset3 = 45;
+            int yOffset3 = 45;
+
+            Color pixel2 = img.GetPixel(xValue - xOffset2, yValue + yOffset2);
+            Color pixel3 = img.GetPixel(xValue + xOffset2, yValue + yOffset2);
+            Color pixel4 = img.GetPixel(xValue + xOffset3, yValue + yOffset3);
+            //Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", yValue - yOffset2 ="+(yValue - yOffset2) + ", y = " + x + ",xValue - xOffset2="+ (xValue - xOffset2) + "  skull pixel2 = " + SetGem(pixel2, ref str).ToString()  + ", str = " + str);
+            // Debug.Log("Gem cord, x = " + y + ", yValue - yOffset2 =" + (yValue - yOffset2) + ", y = " + x + ",xValue - xOffset2=" + (xValue + xOffset2) + " skull pixel3 = " + SetGem(pixel3, ref str).ToString()  + ", str = " + str);
+            //Debug.Log("Gem cord, x = " + y + ", yValue - yOffset3 =" + (yValue - yOffset3) + ", y = " + x + ",xValue - xOffset3=" + (xValue + xOffset3) + " skull pixel4 = " + SetGem(pixel4, ref str).ToString() + ", str = " + str);
+            if (SetGem(pixel2, ref str) == GemTypes.Black && SetGem(pixel3, ref str) == GemTypes.Black && SetGem(pixel4, ref str) == GemTypes.Red) {
+                tmpGem = GemTypes.BrownGiant;
+            }
+        }
+        if (tmpGem == GemTypes.Skull || tmpGem == GemTypes.Blue) {
+            xOffset2 = 0;
+            yOffset2 = 15;
+            Color pixel2 = img.GetPixel(xValue - xOffset1, yValue - yOffset2);
+            Color pixel3 = img.GetPixel(xValue + xOffset1, yValue - yOffset2);
+            Color pixel4 = img.GetPixel(xValue + xOffset2, yValue + yOffset2);
+           // Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+           // Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = " + SetGem(pixel2, ref str).ToString()  + ", str = " + str);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel3 = " + SetGem(pixel3, ref str).ToString()  + ", str = " + str);
+
+            if (SetGem(pixel2, ref str) == GemTypes.Blue && SetGem(pixel3, ref str) == GemTypes.Blue && SetGem(pixel4, ref str) == GemTypes.Skull) {
+                tmpGem = GemTypes.BlueGiant;
+            }
+        }
+
+    }
+
+    private void CheckUmbralStar(Texture2D img, ref GemTypes tmpGem, int x, int y, int xValue, int yValue) {
+        string str = "";
+        int xOffset1 = 33;
+        if (tmpGem == GemTypes.Skull|| tmpGem == GemTypes.Purple || tmpGem == GemTypes.Gremlin) {
+            Color pixel2 = img.GetPixel(xValue - xOffset1, yValue);
+            Color pixel3 = img.GetPixel(xValue + xOffset1, yValue );
+            //Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = " + SetGem(pixel2, ref str) + ", str = " + str);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel3 = " + SetGem(pixel3, ref str) + ", str = " + str);
+            if ((SetGem(pixel2, ref str) == GemTypes.Yellow || SetGem(pixel2, ref str) == GemTypes.Red) && SetGem(pixel3, ref str) == GemTypes.Purple) {
+                tmpGem = GemTypes.UmbralStar;
+            }
+        }
+    }
+
+    private void CheckElementalStar(Texture2D img, ref GemTypes tmpGem, int x, int y, int xValue, int yValue) {
+        string str = "";
+        int xOffset1 = 18;
+        int yOffset1 = 23;
+        if (tmpGem == GemTypes.Skull || tmpGem == GemTypes.Blue || tmpGem == GemTypes.Gremlin) {
+            Color pixel2 = img.GetPixel(xValue - xOffset1, yValue - yOffset1);
+            Color pixel3 = img.GetPixel(xValue + xOffset1, yValue - yOffset1);
+            //Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = " + SetGem(pixel2, ref str) + ", str = " + str);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel3 = " + SetGem(pixel3, ref str) + ", str = " + str);
+            if ((SetGem(pixel2, ref str) == GemTypes.Brown || SetGem(pixel2, ref str) == GemTypes.Purple) && (SetGem(pixel3, ref str) == GemTypes.Blue)) {
+                tmpGem = GemTypes.ElementalStar;
+            }
+        }
+
+    }
+
+    private void CheckSkull5(Texture2D img, ref GemTypes tmpGem, int x, int y, int xValue, int yValue) {
+        string str = "";
+        int yOffset1 = 9;
+        int xOffset1 = 16;
+        if (tmpGem == GemTypes.Yellow) {
+            yOffset1 = 9;
+            Color pixel2 = img.GetPixel(xValue - xOffset1, yValue + yOffset1);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = " + SetGem(pixel2, ref str) + ", str = " + str);
+            if (SetGem(pixel2, ref str) == GemTypes.Red) {
+                tmpGem = GemTypes.Skull5;
+            }
+        }
+        if (tmpGem == GemTypes.Skull) {
+            yOffset1 = 9;
+            xOffset1 = 16;
+            Color pixel2 = img.GetPixel(xValue - xOffset1, yValue+ yOffset1);
+            Color pixel3 = img.GetPixel(xValue + xOffset1, yValue+ yOffset1);
+           // Debug.Log("Pixel,  x = " + xValue + ", " + yValue);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel2 = " + SetGem(pixel2, ref str) + ", str = " + str);
+            //Debug.Log("Gem cord, x = " + y + ", y = " + x + " skull pixel3 = " + SetGem(pixel3, ref str) + ", str = " + str);
+            if ((SetGem(pixel2, ref str) == GemTypes.Yellow || SetGem(pixel2, ref str) == GemTypes.Red || SetGem(pixel2, ref str) == GemTypes.Skull5) && 
+                (SetGem(pixel3, ref str) == GemTypes.Yellow || SetGem(pixel3, ref str) == GemTypes.Red || SetGem(pixel3, ref str) == GemTypes.Skull5)) {
+                tmpGem = GemTypes.Skull5;
+            }
+        }
+
+    }
+
+
+    // This function is used to convert the pixel retrieved with the GetPixel function in UpdateImage into a gem. 
+    // It is first sent to the getNumberFromComp function to convert it from a rgb color value to a 3 string number value.
+    // then that value is than evaluated with a switch statement to assign is a correct gem type.
     public GemTypes SetGem(Color color, ref string str) {
-
         string identifyerString = "";
         identifyerString += getNumberFromColorComp(color.r);
         identifyerString += getNumberFromColorComp(color.g);
@@ -191,7 +371,6 @@ public class FileManager : MonoBehaviour
         switch (identifyerString) {
             case "665":
             case "655":
-            case "633":
             case "642":
             case "666":
             case "654":
@@ -207,13 +386,13 @@ public class FileManager : MonoBehaviour
             case "443":
                 resultGem = GemTypes.Skull;
                 break;
-
-            case "631":
             case "632":
+            case "633":
                 resultGem = GemTypes.Skull5;
                 break;
 
             case "611":
+            case "616":
             case "622":
             case "511":
             case "411":
@@ -221,6 +400,8 @@ public class FileManager : MonoBehaviour
             case "621":
             case "311":
             case "521":
+            case "661":
+            case "631"://fire gems
                 resultGem = GemTypes.Red;
                 break;
 
@@ -236,7 +417,6 @@ public class FileManager : MonoBehaviour
             case "551":
             case "552":
             case "542":
-            case "661":
             case "541"://for wild card
                 ; resultGem = GemTypes.Yellow;
                 break;
@@ -261,6 +441,7 @@ public class FileManager : MonoBehaviour
             case "253":
             case "161":
             case "261":
+            case "232":
 
                 resultGem = GemTypes.Green;
                 break;
@@ -276,9 +457,13 @@ public class FileManager : MonoBehaviour
             case "145":
             case "124":
             case "156":
+            case "113":
             case "114":
             case "115":
             case "255":
+            case "126":
+            case "116"://for elemental star
+            case "166"://for elemental star
 
                 // case "566": potion(kinda rare but might cause problems)
                 resultGem = GemTypes.Blue;
@@ -294,7 +479,6 @@ public class FileManager : MonoBehaviour
             case "526":
             case "656":
             case "536":
-            case "616":
             case "636":
             case "646":
             case "516":
@@ -304,13 +488,16 @@ public class FileManager : MonoBehaviour
             case "626":
             case "316":
             case "326":
+            case "323":
             case "416"://for wild card
                 resultGem = GemTypes.Purple;
                 break;
 
             case "332":
+            case "331":
             case "312":
             case "322":
+            case "321":
                 resultGem = GemTypes.Brown;
                 break;
 
@@ -323,17 +510,18 @@ public class FileManager : MonoBehaviour
             case "223":
             case "112":
             case "233":
+            case "336":
                 resultGem = GemTypes.Gremlin;
                 break;
-
-            case "126":
-
-                resultGem = GemTypes.ElementalStar;
+            case "211":
+                resultGem= GemTypes.WildCard;
                 break;
+
         }
 
         return resultGem;
     }
+    // takes the float value and assigns it a number from 1-6
     private string getNumberFromColorComp(float value) {
         if (value < .255f) {
             return "1";
@@ -380,15 +568,4 @@ public class FileManager : MonoBehaviour
         result.Apply();
         return result;
     }
-
-
-
-
-    public Texture2D toTexture2D(RenderTexture rTex) {
-        Texture2D dest = new Texture2D(rTex.width, rTex.height, TextureFormat.RGBA32, false);
-        dest.Apply(false);
-        Graphics.CopyTexture(rTex, dest);
-        return dest;
-    }
-
 }

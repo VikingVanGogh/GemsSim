@@ -130,3 +130,11 @@ MonoBehaviour:
   rowArrow: {fileID: 1775534601444322, guid: fa78dab491cf38746a2aa279a7b40232, type: 3}
   columnArrow: {fileID: 1629322208613970, guid: 318dc73f291f6304d9cd8ec4a15513a2, type: 3}
   colorBomb: {fileID: 1942758963516802, guid: 36da771d31945f74fb668700cb9b22ff, type: 3}
+  Yellow: 1
+  Blue: 0
+  Red: 0
+  Green: 0
+  Purple: 1
+  Brown: 0
+  Skull: 0
+  explodable: 0

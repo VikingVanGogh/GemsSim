@@ -21,6 +21,14 @@ public class GemButton : MonoBehaviour
     public Button wishGemButton;
     public Button umbralStarGemButton;
     public Button elementalStarGemButton;
+
+    public Button redGiantButton;
+    public Button yellowGiantButton;
+    public Button greenGiantButton;
+    public Button blueGiantButton;
+    public Button brownGiantButton;
+    public Button purpleGiantButton;
+
     public Color highlightedColor;
     public Color nonHighlightedColor;
     private ColorBlock cb;
@@ -48,6 +56,13 @@ public class GemButton : MonoBehaviour
         skull5GemButton.colors = ncb;
         blockGemButton.colors = ncb;
         gremlinGemButton.colors = ncb;
+        //------new explodygems
+        redGiantButton.colors = ncb;
+        yellowGiantButton.colors = ncb;
+        greenGiantButton.colors = ncb;
+        blueGiantButton.colors = ncb;
+        brownGiantButton.colors = ncb;
+        purpleGiantButton.colors = ncb;
     }    
     public void BrownGem() {
         board.UpdateSelectedGem(GemTypes.Brown);
@@ -70,6 +85,13 @@ public class GemButton : MonoBehaviour
         wishGemButton.colors = ncb;
         elementalStarGemButton.colors = ncb;
         umbralStarGemButton.colors = ncb;
+
+        redGiantButton.colors = ncb;
+        yellowGiantButton.colors = ncb;
+        greenGiantButton.colors = ncb;
+        blueGiantButton.colors = ncb;
+        brownGiantButton.colors = ncb;
+        purpleGiantButton.colors = ncb;
 
 
         switch (gem) {
@@ -115,6 +137,26 @@ public class GemButton : MonoBehaviour
             case GemTypes.ElementalStar:
                 elementalStarGemButton.colors = cb;
                 break;
+
+            case GemTypes.RedGiant:
+                redGiantButton.colors = cb;
+                break;
+            case GemTypes.YellowGiant:
+                yellowGiantButton.colors = cb;
+                break;
+            case GemTypes.GreenGiant:
+                greenGiantButton.colors = cb;
+                break;
+            case GemTypes.BlueGiant:
+                blueGiantButton.colors = cb;
+                break;
+            case GemTypes.BrownGiant:
+                brownGiantButton.colors = cb;
+                break;
+            case GemTypes.PurpleGiant:
+                purpleGiantButton.colors = cb;
+                break;
+
         }
         
 
@@ -175,6 +217,32 @@ public class GemButton : MonoBehaviour
         board.UpdateSelectedGem(GemTypes.UmbralStar);
         ChangeButtonColor(GemTypes.UmbralStar);
     }
+
+    public void RedGiant() {
+        board.UpdateSelectedGem(GemTypes.RedGiant);
+        ChangeButtonColor(GemTypes.RedGiant);
+    }
+    public void YellowGiant() {
+        board.UpdateSelectedGem(GemTypes.YellowGiant);
+        ChangeButtonColor(GemTypes.YellowGiant);
+    }
+    public void GreenGiant() {
+        board.UpdateSelectedGem(GemTypes.GreenGiant);
+        ChangeButtonColor(GemTypes.GreenGiant);
+    }
+    public void BlueGiant() {
+        board.UpdateSelectedGem(GemTypes.BlueGiant);
+        ChangeButtonColor(GemTypes.BlueGiant);
+    }
+    public void BrownGiant() {
+        board.UpdateSelectedGem(GemTypes.BrownGiant);
+        ChangeButtonColor(GemTypes.BrownGiant);
+    }
+    public void PurpleGiant() {
+        board.UpdateSelectedGem(GemTypes.PurpleGiant);
+        ChangeButtonColor(GemTypes.PurpleGiant);
+    }
+
 
 
 
