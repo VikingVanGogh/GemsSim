@@ -43,6 +43,8 @@ public class Gem : MonoBehaviour {
     public bool Purple = false;
     public bool Brown = false;
     public bool Skull = false;
+    public bool explodable = false;
+    public bool block = false;
 
 
     // Use this for initialization

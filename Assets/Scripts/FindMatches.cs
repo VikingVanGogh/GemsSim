@@ -15,6 +15,9 @@ public class FindMatches : MonoBehaviour {
     private const string PURPLE = "Purple Gem";
     private const string BROWN = "Brown Gem";
     private const string GREEN = "Green Gem";
+    private const string BLOCK = "Block Gem";
+    private const string GREMLIN = "Gremlin Gem";
+    private const string WISH = "WISH Gem";
 
     public List<GameObject> currentMatches = new List<GameObject>();
     private List<GameObject> match4Plus = new List<GameObject>();
@@ -42,9 +45,11 @@ public class FindMatches : MonoBehaviour {
                     CheckUp(x, y, ref move);
                     CheckDown(x, y, ref move);
                     CheckT(x, y, ref move);
+                    CheckLeftT(x, y, ref move);
+                    CheckRightT(x, y, ref move);
                     CheckupSideDownT(x, y, ref move);
                     if (move.count > 3) {
-                        Debug.Log("foundMove at x= "+x+", y ="+y );
+                        //Debug.Log("foundMove at x= "+x+", y ="+y );
                         moveFound = true;
                     } else {
                         move.Clear();
@@ -54,9 +59,40 @@ public class FindMatches : MonoBehaviour {
         }
         match4Plus.Clear();
     }
+    private void CheckLeftT(int x, int y, ref Match4PlusMoves move) {
+        if (CheckArray(x, y) && CheckArray(x, y-1 ) && CheckArray(x,  y-2) && CheckArray(x+1, y - 1) && CheckArray(x + 2, y - 1) &&
+            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x + 1, y-1], board.allGems[x+2, y-1], ref move) ) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y - 1], ref move);
+            AddMove(board.allGems[x, y - 2], ref move);
+            AddMove(board.allGems[x + 1, y-1], ref move);
+            AddMove(board.allGems[x +2, y-1], ref move);
+            CheckRight(x, y-1, ref move);
+            CheckLeft(x, y-1, ref move);
+            CheckDown(x, y, ref move);
+            CheckUp(x, y, ref move);
+            //Debug.Log("move.count = " + move.count);
+        }
+    }
+    private void CheckRightT(int x, int y, ref Match4PlusMoves move) {
+        if (CheckArray(x, y) && CheckArray(x, y - 1) && CheckArray(x, y - 2) && CheckArray(x - 1, y - 1) && CheckArray(x - 2, y - 1) &&
+            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x - 1, y - 1], board.allGems[x - 2, y - 1], ref move)) {
+            AddMove(board.allGems[x, y], ref move);
+            AddMove(board.allGems[x, y - 1], ref move);
+            AddMove(board.allGems[x, y - 2], ref move);
+            AddMove(board.allGems[x - 1, y - 1], ref move);
+            AddMove(board.allGems[x - 2, y - 1], ref move);
+            CheckRight(x, y - 1, ref move);
+            CheckLeft(x, y - 1, ref move);
+            CheckDown(x, y, ref move);
+            CheckUp(x, y, ref move);
+            //Debug.Log("move.count = " + move.count);
+        }
+    }
+
     private void CheckT(int x, int y, ref Match4PlusMoves move) {
-        if ((x + 1 < board.width && x - 1 >= 0) && (y - 2 >= 0) &&
-            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x + 1, y], board.allGems[x-1, y], ref move) ) {
+        if (CheckArray(x + 1, y) && CheckArray(x - 1, y) && CheckArray(x, y - 2) &&
+            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x + 1, y], board.allGems[x - 1, y], ref move)) {
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x, y - 1], ref move);
             AddMove(board.allGems[x, y - 2], ref move);
@@ -65,12 +101,12 @@ public class FindMatches : MonoBehaviour {
             CheckRight(x, y, ref move);
             CheckLeft(x, y, ref move);
             CheckDown(x, y, ref move);
-            Debug.Log("move.count = " + move.count);
+            //Debug.Log("move.count = " + move.count);
         }
     }
 
     private void CheckupSideDownT(int x, int y, ref Match4PlusMoves move) {
-        if ((x + 1 < board.width && x - 1 >= 0) && (y + 2 < board.height) &&
+        if (CheckArray(x + 1, y) && CheckArray(x - 1, y) && CheckArray(x, y + 2) &&
             SpecialGems5(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], board.allGems[x + 1, y], board.allGems[x - 1, y], ref move)) {
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x, y + 1], ref move);
@@ -80,12 +116,12 @@ public class FindMatches : MonoBehaviour {
             CheckRight(x, y, ref move);
             CheckUp(x, y, ref move);
             CheckLeft(x, y, ref move);
-            Debug.Log("move.count = " + move.count);
+            //Debug.Log("move.count = " + move.count);
         }
     }
     private void CheckL(int x, int y, ref Match4PlusMoves move) {
-        if ((x + 2 < board.width) && (y + 2 < board.height) &&
-            SpecialGems5(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], board.allGems[x + 1, y], board.allGems[x + 2, y], ref move)) {
+        if (CheckArray(x + 2, y) && CheckArray(x, y + 2) &&
+             SpecialGems5(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], board.allGems[x + 1, y], board.allGems[x + 2, y], ref move)) {
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x, y+1], ref move);
             AddMove(board.allGems[x, y + 2], ref move);
@@ -93,12 +129,12 @@ public class FindMatches : MonoBehaviour {
             AddMove(board.allGems[x + 2, y], ref move);
             CheckRight(x, y, ref move);
             CheckUp(x, y, ref move);
-            Debug.Log("move.count = "+move.count);
+           //Debug.Log("move.count = "+move.count);
         }
     }
     private void CheckUpsideDownBackWardsL(int x, int y, ref Match4PlusMoves move) {
-        if ((x - 2 >=0) && (y - 2 >=0) &&
-            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x - 1, y], board.allGems[x - 2, y], ref move)) {
+        if (CheckArray(x - 2, y) && CheckArray(x, y - 2) &&
+             SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x - 1, y], board.allGems[x - 2, y], ref move)) {
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x, y - 1], ref move);
             AddMove(board.allGems[x, y - 2], ref move);
@@ -110,7 +146,7 @@ public class FindMatches : MonoBehaviour {
     }
 
     private void CheckUpsideDownL(int x, int y, ref Match4PlusMoves move) {
-        if ((x + 2 < board.width) && (y - 2 >= 0) &&
+        if (CheckArray(x + 2, y) && CheckArray(x, y - 2) &&
             SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x + 1, y], board.allGems[x +2, y], ref move)) {
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x, y - 1], ref move);
@@ -123,7 +159,7 @@ public class FindMatches : MonoBehaviour {
     }
 
     private void CheckBackwardsL(int x, int y, ref Match4PlusMoves move) {
-        if ((x - 2 >=0) && (y + 2 < board.height) &&
+        if (CheckArray(x - 2, y) && CheckArray(x, y + 2) &&
             SpecialGems3(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], ref move) &&
             SpecialGems3(board.allGems[x, y], board.allGems[x - 1, y], board.allGems[x - 2, y], ref move)) {
             AddMove(board.allGems[x, y], ref move);
@@ -139,8 +175,8 @@ public class FindMatches : MonoBehaviour {
 
 
     private void CheckCross(int x,int y,ref Match4PlusMoves move) {
-        if ((x - 1 >= 0 && x + 1 < board.width) && (y - 1 >= 0 && y + 1 < board.height) &&
-            SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y + 1 ], board.allGems[x + 1, y], board.allGems[x - 1, y], ref move)) {
+        if (CheckArray(x - 1, y) && CheckArray(x + 1, y) && CheckArray(x, y - 1) && CheckArray(x, y + 1) &&
+           SpecialGems5(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y + 1 ], board.allGems[x + 1, y], board.allGems[x - 1, y], ref move)) {
             AddMove(board.allGems[x, y + 1],ref move);
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x, y - 1], ref move);
@@ -153,7 +189,7 @@ public class FindMatches : MonoBehaviour {
         }
     }
     private void CheckRight(int x, int y, ref Match4PlusMoves move) {
-        while (x + 3 < board.height && SpecialGems4(board.allGems[x, y], board.allGems[x + 1, y], board.allGems[x + 2, y], board.allGems[x + 3, y], ref move)) {
+        while (CheckArray(x + 3, y) && SpecialGems4(board.allGems[x, y], board.allGems[x + 1, y], board.allGems[x + 2, y], board.allGems[x + 3, y], ref move)) {
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x+1, y], ref move);
             AddMove(board.allGems[x+2, y], ref move);
@@ -162,7 +198,7 @@ public class FindMatches : MonoBehaviour {
         }
     }
     private void CheckLeft(int x, int y, ref Match4PlusMoves move) {
-        while (x -3 >=0 && SpecialGems4(board.allGems[x, y], board.allGems[x - 1, y], board.allGems[x - 2, y], board.allGems[x - 3, y], ref move)) {
+        while (CheckArray(x - 3, y) && SpecialGems4(board.allGems[x, y], board.allGems[x - 1, y], board.allGems[x - 2, y], board.allGems[x - 3, y], ref move)) {
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x - 1, y], ref move);
             AddMove(board.allGems[x - 2, y], ref move);
@@ -171,7 +207,7 @@ public class FindMatches : MonoBehaviour {
         }
     }
     private void CheckUp(int x, int y, ref Match4PlusMoves move) {
-        while (y+3<board.height && SpecialGems4(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], board.allGems[x, y + 3], ref move)) {
+        while (CheckArray(x, y + 3) && SpecialGems4(board.allGems[x, y], board.allGems[x, y + 1], board.allGems[x, y + 2], board.allGems[x, y + 3], ref move)) {
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x, y + 1], ref move);
             AddMove(board.allGems[x, y + 2], ref move);
@@ -180,7 +216,7 @@ public class FindMatches : MonoBehaviour {
         }
     }
     private void CheckDown(int x, int y, ref Match4PlusMoves move) {
-        while (y -3 >= 0 && SpecialGems4(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x, y - 3], ref move)) {
+        while (CheckArray(x, y - 3) && SpecialGems4(board.allGems[x, y], board.allGems[x, y - 1], board.allGems[x, y - 2], board.allGems[x, y - 3], ref move)) {
             AddMove(board.allGems[x, y], ref move);
             AddMove(board.allGems[x, y - 1], ref move);
             AddMove(board.allGems[x, y - 2], ref move);
@@ -227,7 +263,7 @@ public class FindMatches : MonoBehaviour {
         }
     }
     private bool SpecialGems5(GameObject gem1, GameObject gem2, GameObject gem3, GameObject gem4, GameObject gem5, ref Match4PlusMoves move) {
-        if (gem1 != null && gem2 != null && gem3 != null && gem4 != null && gem5!=null) {
+        if (gem1 != null && gem2 != null && gem3 != null && gem4 != null && gem5!=null && NotThisGem(gem1, gem2, gem3)) {
             if (gem1.GetComponent<Gem>().Blue && gem2.GetComponent<Gem>().Blue && gem3.GetComponent<Gem>().Blue && gem4.GetComponent<Gem>().Blue && gem5.GetComponent<Gem>().Blue) {
                 move.color = BLUE;
                 return true;
@@ -262,7 +298,7 @@ public class FindMatches : MonoBehaviour {
     }
 
     private bool SpecialGems4(GameObject gem1, GameObject gem2, GameObject gem3, GameObject gem4, ref Match4PlusMoves move) {
-        if (gem1 != null && gem2 != null && gem3 != null && gem4 != null) {
+        if (gem1 != null && gem2 != null && gem3 != null && gem4 != null && NotThisGem(gem1, gem2, gem3)) {
             if (gem1.GetComponent<Gem>().Blue && gem2.GetComponent<Gem>().Blue && gem3.GetComponent<Gem>().Blue && gem4.GetComponent<Gem>().Blue) {
                 move.color = BLUE;
                 return true;
@@ -296,7 +332,7 @@ public class FindMatches : MonoBehaviour {
         return false;
     }
     private bool SpecialGems3(GameObject gem1, GameObject gem2, GameObject gem3, ref Match4PlusMoves move) {
-        if (gem1 != null && gem2 != null && gem3 != null) {
+        if (gem1 != null && gem2 != null && gem3 != null && NotThisGem(gem1, gem2, gem3)) {
             if (gem1.GetComponent<Gem>().Blue && gem2.GetComponent<Gem>().Blue && gem3.GetComponent<Gem>().Blue) {
                 move.color = BLUE;
                 return true;
@@ -445,11 +481,8 @@ public class FindMatches : MonoBehaviour {
 
     }
     private bool CheckArray(int x, int y) {
-        if (x < board.width && !(x >= board.height) && !(x < 0)) {
-            //Debug.Log("board x = " + board.width + " , x = " + x);
-            if (y < board.height && !(y >= board.height) && !(y < 0)) {
-                return true;
-            }
+        if ((x >= 0 && x < board.width) && (y >= 0 && y < board.height)) {
+            return true;
         }
         return false;
 
@@ -646,8 +679,18 @@ public class FindMatches : MonoBehaviour {
         }
 
     }
+    private bool NotThisGem(GameObject gem1, GameObject gem2, GameObject gem3 ) {
+        if ((gem1.tag == BLOCK || gem1.tag == WISH) ||
+            (gem2.tag == BLOCK || gem2.tag == WISH) ||
+            (gem3.tag == BLOCK || gem3.tag == WISH)) {
+            return false;
+        }
+        return true;
+
+    }
+
     private bool SpecialGems3(GameObject gem1, GameObject gem2, GameObject gem3) {
-        if (gem1 != null && gem2 != null && gem3 != null) {
+        if (gem1 != null && gem2 != null && gem3 != null && NotThisGem(gem1,gem2,gem3)) {
             if (gem1.GetComponent<Gem>().Blue && gem2.GetComponent<Gem>().Blue && gem3.GetComponent<Gem>().Blue) {
                 return true;
             }

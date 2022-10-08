@@ -19,6 +19,12 @@ TagManager:
   - Gremlin Gem
   - UmbralStar Gem
   - ElementalStar Gem
+  - Red Giant
+  - Yellow Giant
+  - Green Giant
+  - Blue Giant
+  - Brown Giant
+  - Purple Giant
   layers:
   - Default
   - TransparentFX
